@@ -346,5 +346,120 @@ input_node=tf.placeholder(shape=(None,3),dtype=dtype)
 weight=tf.Variable([0,0,0],dtype=dtype)
 bias=tf.Variable([0],dtype=dtype)
 output_node=tf.squeeze(tf.sigmoid(tf.matmul(input_node,weight[:,tf.newaxis])+bias))
+'''
+output_node=tf.greater(output_node,0.5)
+output_node=tf.cast(output_node, dtype)
+'''
+#before learning
+sess=tf.Session()
+init=tf.initialize_all_variables()
+sess.run(init)
+output=sess.run(output_node,feed_dict={input_node:x_train})
 
+#training
+mse_train=tf.compat.v1.losses.mean_squared_error(output_node,y_train)
+train=tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(mse_train)
 
+print("before train : ",sess.run(mse_train,feed_dict={input_node:x_train}))
+
+num_iteration=10000
+mse_train_list=[]
+for i in range(0,num_iteration):
+    sess.run(train,feed_dict={input_node:x_train})
+    mse=sess.run(mse_train,feed_dict={input_node:x_train})
+    mse_train_list.append(mse)
+    if i%100==0:
+        print(mse)
+        
+plt.plot(np.arange(0,len(mse_train_list)),mse_train_list)
+
+#training set prediction
+y_pred=sess.run(output_node,feed_dict={input_node:x_train})
+y_pred_train=np.copy(y_pred)
+y_pred_train[y_pred>0.5]=1
+y_pred_train[y_pred<=0.5]=0
+
+acc=y_pred_train==y_train
+acc_train=np.zeros(acc.shape)
+acc_train[acc==True]=1
+acc_train=sum(acc_train)/len(acc_train)
+print("acc_train : ",acc_train)
+
+#test set prediction
+y_pred=sess.run(output_node,feed_dict={input_node:x_test})
+y_pred_test=np.copy(y_pred)
+y_pred_test[y_pred>0.5]=1
+y_pred_test[y_pred<=0.5]=0
+
+acc=y_pred_test==y_test
+acc_test=np.zeros(acc.shape)
+acc_test[acc==True]=1
+acc_test=sum(acc_test)/len(acc_test)
+print("acc_test : ",acc_test)
+
+sess.close()
+######################################################################################
+######################################################################################
+######################################################################################
+#using single layer perceptron
+dtype=tf.float64
+input_node=tf.placeholder(shape=(None,3),dtype=dtype)
+w1=tf.Variable([[0,0,0],
+               [0,0,0],
+               [0,0,0]],dtype=dtype)
+b1=tf.Variable([0,0,0],dtype=dtype)
+hidden1=tf.nn.relu(tf.matmul(input_node,w1)+b1)
+w2=tf.Variable([0,0,0],dtype=dtype)
+b2=tf.Variable([0],dtype=dtype)
+output_node=tf.squeeze(tf.sigmoid(tf.matmul(hidden1,w2[:,tf.newaxis])+b2))
+
+'''
+output_node=tf.greater(output_node,0.5)
+output_node=tf.cast(output_node, dtype)
+'''
+#before learning
+sess=tf.Session()
+init=tf.initialize_all_variables()
+sess.run(init)
+output=sess.run(output_node,feed_dict={input_node:x_train})
+
+#training
+mse_train=tf.compat.v1.losses.mean_squared_error(output_node,y_train)
+train=tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(mse_train)
+
+print("before train : ",sess.run(mse_train,feed_dict={input_node:x_train}))
+
+num_iteration=10000
+mse_train_list=[]
+for i in range(0,num_iteration):
+    sess.run(train,feed_dict={input_node:x_train})
+    mse=sess.run(mse_train,feed_dict={input_node:x_train})
+    mse_train_list.append(mse)
+    if i%100==0:
+        print(mse)
+        
+plt.plot(np.arange(0,len(mse_train_list)),mse_train_list)
+
+#training set prediction
+y_pred=sess.run(output_node,feed_dict={input_node:x_train})
+y_pred_train=np.copy(y_pred)
+y_pred_train[y_pred>0.5]=1
+y_pred_train[y_pred<=0.5]=0
+
+acc=y_pred_train==y_train
+acc_train=np.zeros(acc.shape)
+acc_train[acc==True]=1
+acc_train=sum(acc_train)/len(acc_train)
+print("acc_train : ",acc_train)
+
+#test set prediction
+y_pred=sess.run(output_node,feed_dict={input_node:x_test})
+y_pred_test=np.copy(y_pred)
+y_pred_test[y_pred>0.5]=1
+y_pred_test[y_pred<=0.5]=0
+
+acc=y_pred_test==y_test
+acc_test=np.zeros(acc.shape)
+acc_test[acc==True]=1
+acc_test=sum(acc_test)/len(acc_test)
+print("acc_test : ",acc_test)
